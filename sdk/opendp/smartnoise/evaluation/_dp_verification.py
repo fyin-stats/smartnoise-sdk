@@ -1,13 +1,13 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import math
-import copy
-import os
-from scipy import stats
-import opendp.smartnoise.evaluation._aggregation as agg
-import opendp.smartnoise.evaluation._exploration as exp
-from opendp.smartnoise.metadata.collection import *
+# import pandas as pd
+# import numpy as np
+# import matplotlib.pyplot as plt
+# import math
+# import copy
+# import os
+# from scipy import stats
+# import opendp.smartnoise.evaluation._aggregation as agg
+# import opendp.smartnoise.evaluation._exploration as exp
+# from opendp.smartnoise.metadata.collection import *
 
 
 class DPVerification:
@@ -626,3 +626,8 @@ class DPVerification:
         acc_res, utility_res = None, None
         bias_res = np.all(np.array([res[4] for data, res in res_list.items()]))
         return dp_res, acc_res, utility_res, bias_res
+
+
+if __name__ == "__main__":
+    dv = DPVerification()
+    dv.generate_neighbors()

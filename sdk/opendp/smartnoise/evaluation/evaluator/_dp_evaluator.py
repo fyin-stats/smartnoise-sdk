@@ -8,6 +8,20 @@ from scipy import stats, spatial
 import math
 import matplotlib.pyplot as plt
 
+# added for the purpose of having stochastic evaluator based on kde
+#
+from sklearn.neighbors import KernelDensity
+# from scipy.stats import gaussian_kde
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import GridSearchCV
+import math
+from scipy import stats
+import scipy.integrate as integrate
+import scipy.special as special
+#
+#
+
 
 class DPEvaluator(Evaluator):
     def _generate_histogram_neighbors(self, fD1, fD2, ep: EvaluatorParams):
@@ -94,6 +108,80 @@ class DPEvaluator(Evaluator):
         )
 
         return not bound_exceeded, d1histupperbound, d2histupperbound, d1lower, d2lower
+
+    def _kde_dp_test(self, fD1, fD2, bandwidth_method='rule-of-thumb', binlist, cv_fold=10,
+                     ep: EvaluatorParams,
+                     pp: PrivacyParams):
+        """
+        :param self:
+        :param fD1: dataset 1, needs to be an 1D numpy array
+        :param fD2: dataset 2, needs to be an 1D numpy array
+        :param bandwidth_method: default 'rule-of-thumb', 'cv' is also an option
+        :param binlist: list of bins for comparison
+        :param ep: EvaluatorParams
+        :param pp: PrivacyParams
+        :return:
+        """
+
+        # figure out the size
+        d1size = fD1.size
+        d2size = fD2.size
+
+        # bandwidth selection
+        if bandwidth_method == 'cv':
+            # 1.144 and (-1/5) are based on the choice in bw.ucv function in R (derived from theoretical results)
+            hmax1 = 1.144 * np.std(fD1) * d1size ** (-1 / 5)
+            hmax2 = 1.144 * np.std(fD2) * d2size ** (-1 / 5)
+            grid1 = GridSearchCV(KernelDensity(),
+                                 {'bandwidth': np.linspace(hmax1 * 0.1, hmax1, 100)},
+                                 cv=cv_fold)  # 10-fold cross-validation
+            grid2 = GridSearchCV(KernelDensity(),
+                                 {'bandwidth': np.linspace(hmax2 * 0.1, hmax2, 100)},
+                                 cv=cv_fold)  # 10-fold cross-validation
+            # fit
+            grid1.fit(fD1[:, None])
+            grid2.fit(fD2[:, None])
+            #
+            h1 = grid1.best_params_["bandwidth"]
+            h2 = grid2.best_params_["bandwidth"]
+        else:
+            # rule of thumb choice of bandwidth
+            # according to https://en.wikipedia.org/wiki/Kernel_density_estimation
+            h1 = 1.06 * np.std(fD1) * d1size ** (-1 / 5)
+            h2 = 1.06 * np.std(fD2) * d2size ** (-1 / 5)
+
+        #
+        kde1 = KernelDensity(kernel='gaussian', bandwidth=h1).fit(fD1[:, None])
+        kde2 = KernelDensity(kernel='gaussian', bandwidth=h2).fit(fD2[:, None])
+
+        # area under the KDE curve based on numerical integration
+        # go over the binlist to figure out px and py
+        num_buckets = binlist.size - 1
+        # initialize px and py
+        px = np.zeros(num_buckets)
+        py = np.zeros(num_buckets)
+        #
+        for i in range(num_buckets):
+            px[i], _ = integrate.quad(lambda x: np.exp(kde1.score_samples(np.array([x])[:, None])), binlist[i],
+                                      binlist[i + 1])
+            py[i], _ = integrate.quad(lambda x: np.exp(kde2.score_samples(np.array([x])[:, None])), binlist[i],
+                                      binlist[i + 1])
+        #
+        d1kdebound = px * math.exp(pp.epsilon) + pp.delta
+        d2kdebound = py * math.exp(pp.epsilon) + pp.delta
+
+        # Check if any of the bounds across the bins violate the relaxed DP condition
+        bound_exceeded = np.any(
+
+            np.greater(px, d2kdebound)
+
+        ) or np.any(
+
+            np.greater(py, d1kdebound)
+
+        )
+
+        return not bound_exceeded
 
     def _plot_histogram_neighbors(
         self,
