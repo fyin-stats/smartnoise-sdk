@@ -5,6 +5,7 @@ class Metrics:
 
     def __init__(self):
         self.dp_res = False
+        self.kde_dp_res = False
         self.wasserstein_distance = 0.0
         self.jensen_shannon_divergence = 0.0
         self.kl_divergence = 0.0
@@ -17,3 +18,4 @@ class Metrics:
         self.utility_res = False
         self.bias_res = False
         self.error = None
+

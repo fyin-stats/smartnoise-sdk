@@ -105,3 +105,11 @@ class TestStochastic:
         test_logger.debug("Result of Utility Test on GROUP BY and AVG aggregate: " + str(utility_res))
         test_logger.debug("Result of Bias Test on GROUP BY and AVG aggregate: " + str(bias_res))
         assert(dp_res)
+
+
+#
+if __name__ == "__main__":
+    test = TestStochastic()
+    test.test_dp_laplace_mechanism_count()
+
+# add a new function

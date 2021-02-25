@@ -52,6 +52,7 @@ class TestEval:
         # Before running the DP test, it should be default to False
         # and Wasserstein distance should be 0
         assert(metrics.dp_res == False)
+        assert (metrics.kde_dp_res == False)
         assert(metrics.wasserstein_distance == 0.0)
         assert(metrics.jensen_shannon_divergence == 0.0)
         assert(metrics.kl_divergence == 0.0)
@@ -70,6 +71,9 @@ class TestEval:
         # After evaluation, it should return True and distance metrics should be non-zero
         for key, metrics in key_metrics.items():
             assert(metrics.dp_res == True)
+            # kde res (try to find a case in which kde says fail, dp says passed?)
+            assert(metrics.kde_dp_res == True) # kde_dp_res
+            #
             test_logger.debug("Wasserstein Distance:" + str(metrics.wasserstein_distance))
             test_logger.debug("Jensen Shannon Divergence:" + str(metrics.jensen_shannon_divergence))
             test_logger.debug("KL Divergence:" + str(metrics.kl_divergence))

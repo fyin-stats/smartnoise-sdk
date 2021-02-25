@@ -110,8 +110,7 @@ class DPEvaluator(Evaluator):
         return not bound_exceeded, d1histupperbound, d2histupperbound, d1lower, d2lower
 
     def _kde_dp_test(self, fD1, fD2, bandwidth_method='rule-of-thumb', binlist, cv_fold=10,
-                     ep: EvaluatorParams,
-                     pp: PrivacyParams):
+                     ep: EvaluatorParams, pp: PrivacyParams):
         """
         :param self:
         :param fD1: dataset 1, needs to be an 1D numpy array
@@ -361,6 +360,11 @@ class DPEvaluator(Evaluator):
                 d1hist, d2hist, bin_edges, fD1.size, fD2.size, ep, pp
             )
 
+            #
+            kde_dp_res = self._kde_dp_test(
+                fD1 = fD1, fD2 = fD2, binlist = bin_edges, ep = ep, pp = pp
+            )
+
             # Compute Metrics
             metrics.dp_res = dp_res
             metrics.wasserstein_distance = self.wasserstein_distance(fD1, fD2)
@@ -370,6 +374,10 @@ class DPEvaluator(Evaluator):
             metrics.msd = np.sum(fD1.astype(np.float) - fD_actual) / fD1.size
             metrics.std = np.std(fD1.astype(np.float))
             metrics.bias_res = self.bias_test(fD1, fD_actual, ep.sig_level)
+
+            # add kde metric by Fan, 2/25/2021
+            # print(kde_dp_res)
+            metrics.kde_dp_res = kde_dp_res
 
             # Add key and metrics to final result
             key_metrics[key] = metrics
