@@ -7,7 +7,7 @@ from opendp.smartnoise.evaluation.report._report import Report
 from opendp.smartnoise.evaluation.privacyalgorithm._base import PrivacyAlgorithm
 from opendp.smartnoise.evaluation.evaluator._dp_evaluator import DPEvaluator
 from opendp.smartnoise.evaluation.benchmarking._dp_benchmark import DPBenchmarking
-from opendp.smartnoise.evaluation.metrics._metrics import Metrics
+# from opendp.smartnoise.evaluation.metrics._metrics import Metrics
 from dp_lib import DPSampleLibrary
 from dp_algorithm import DPSample
 from dp_multikey import DPMultiKey
@@ -15,6 +15,27 @@ import pandas as pd
 import numpy as np
 import random
 import pytest
+
+# class Metrics:
+#     """
+# 	Defines the fields available in the metrics payload object
+# 	"""
+#
+#     def __init__(self):
+#         self.dp_res = False
+#         self.kde_dp_res = False
+#         self.wasserstein_distance = 0.0
+#         self.jensen_shannon_divergence = 0.0
+#         self.kl_divergence = 0.0
+#         self.mse = 0.0
+#         self.msd = 0.0
+#         self.std = 0.0
+#         self.acc_res = False
+#         self.within_bounds = 0
+#         self.outside_bounds = 0
+#         self.utility_res = False
+#         self.bias_res = False
+#         self.error = None
 
 class TestEval:
     def test_interface_algorithm(self):
